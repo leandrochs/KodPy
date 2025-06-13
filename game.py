@@ -8,13 +8,19 @@ mouse: any  # type: ignore
 music: any  # type: ignore
 sounds: any  # type: ignore
 
+
+# Configurações da janela
 WIDTH = 800
 HEIGHT = 600
+
 # Estados do jogo
 game_state = "menu"  # menu, playing, game_over
 
+# Sons e música
 is_music_enabled = True
 is_sound_enabled = True
+
+########################## Player
 class Player(Actor):
     def __init__(self):
         super().__init__('player_idle/player_idle1', (100, 500))
@@ -78,12 +84,15 @@ class Player(Actor):
             self.image = f'player_idle/player_idle{self.animation_frame + 1}'
 
 
+#################################### Plataforma ########
 class Platform:
     def __init__(self, x, y, width, height):
         self.rectangle = Rect((x, y), (width, height))
 
     def draw(self):
         screen.draw.filled_rect(self.rectangle, (100, 100, 100))
+
+############################ Inimigos
 class Enemy(Actor):
     def __init__(self, sprite_prefix, x, y):
         super().__init__(f'{sprite_prefix}1', (x, y))
@@ -126,6 +135,8 @@ class Bee(Enemy):
             self.movement_speed *= -1
         self.animate()
 
+
+# Instâncias
 player = Player()
 platforms = [Platform(0, 580, 800, 20), Platform(300, 450, 150, 20)]
 # enemies = [Enemy(500, 530)]
@@ -135,6 +146,7 @@ enemies = [
 ]
 
 
+##################### dano ao player
 player.health = 3
 player.invincible = False
 player.invincibility_timer = 0
@@ -164,9 +176,17 @@ def check_player_enemy_collisions():
                 music.stop()
             return
 
+
+
+###########################################
+
+
+# Menu buttons
 start_button = Actor('menu/start_btn.png', (400, 200))
 sound_button = Actor('menu/sound_on_btn', (400, 350))
 exit_button = Actor('menu/exit_btn', (400, 500))
+
+# Funções principais
 def update():
     global game_state
     if game_state == "playing":
@@ -190,6 +210,7 @@ def draw_menu():
     start_button.draw()
     sound_button.draw()
     exit_button.draw()
+
 def draw_game_screen():
     for platform in platforms:
         platform.draw()
@@ -252,3 +273,4 @@ if is_music_enabled:
 def draw_game_over_screen():
     screen.draw.text("GAME OVER", center=(400, 200), fontsize=80, color="red")
     screen.draw.text("Clique para voltar ao menu", center=(400, 300), fontsize=40, color="white")
+
