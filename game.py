@@ -14,7 +14,8 @@ WIDTH = 800
 HEIGHT = 600
 
 # Estados do jogo
-game_state = "menu"  # menu, playing, game_over
+GAME_STATES = {"MENU": "menu", "PLAYING": "playing", "GAME_OVER": "game_over"}
+current_game_state = GAME_STATES["MENU"]
 
 # Sons e música
 is_music_enabled = True
@@ -152,7 +153,7 @@ player.invincibility_timer = 0
 
 
 def check_player_enemy_collisions():
-    global game_state
+    global current_game_state
     if player.invincible:
         player.invincibility_timer += 1
         if player.invincibility_timer > 60:
@@ -169,7 +170,7 @@ def check_player_enemy_collisions():
                 sounds.hit.play()
             print(f"Player hit! Health: {player.health}")
             if player.health <= 0:
-                game_state = "game_over"
+                current_game_state = GAME_STATES["GAME_OVER"]
                 music.stop()
             break
 
@@ -185,8 +186,8 @@ exit_button = Actor('menu/exit_btn', (400, 500))
 
 # Funções principais
 def update():
-    global game_state
-    if game_state == "playing":
+    global current_game_state
+    if current_game_state == "playing":
         player.update()
         for enemy in enemies:
             enemy.update()
@@ -194,11 +195,11 @@ def update():
 
 def draw():
     screen.clear()
-    if game_state == "menu":
+    if current_game_state == "menu":
         draw_menu()
-    elif game_state == "playing":
+    elif current_game_state == "playing":
         draw_game_screen()
-    elif game_state == "game_over":
+    elif current_game_state == "game_over":
         draw_game_over_screen()
 
 def draw_menu():
@@ -218,10 +219,10 @@ def draw_game_screen():
 
 
 def on_mouse_down(pos):
-    global game_state, is_music_enabled
-    if game_state == "menu":
+    global current_game_state, is_music_enabled
+    if current_game_state == "menu":
         if start_button.collidepoint(pos):
-            game_state = "playing"
+            current_game_state = GAME_STATES["PLAYING"]
             if is_music_enabled:
                 music.play('bg_music')
                 music.set_volume(0.3)
@@ -229,8 +230,8 @@ def on_mouse_down(pos):
             toggle_music_and_sound()
         elif exit_button.collidepoint(pos):
             quit()
-    elif game_state == "game_over":
-        game_state = "menu"
+    elif current_game_state == "game_over":
+        current_game_state = GAME_STATES["MENU"]
         reset_game_state()
 
 def reset_game_state():
