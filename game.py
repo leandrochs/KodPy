@@ -198,7 +198,7 @@ def draw():
     if current_game_state == "menu":
         draw_menu()
     elif current_game_state == "playing":
-        draw_game_screen()
+        draw_playing_state()
     elif current_game_state == "game_over":
         draw_game_over_screen()
 
@@ -209,7 +209,7 @@ def draw_menu():
     sound_button.draw()
     exit_button.draw()
 
-def draw_game_screen():
+def draw_playing_state():
     for platform in platforms:
         platform.draw()
     for enemy in enemies:
