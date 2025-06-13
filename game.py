@@ -155,12 +155,38 @@ def check_player_enemy_collisions():
 start_button = Actor('menu/start_btn.png', (400, 200))
 sound_button = Actor('menu/sound_on_btn', (400, 350))
 exit_button = Actor('menu/exit_btn', (400, 500))
+def update():
+    global game_state
+    if game_state == "playing":
+        player.update()
+        for enemy in enemies:
+            enemy.update()
+        check_player_enemy_collisions()
+
+def draw():
+    screen.clear()
+    if game_state == "menu":
+        draw_menu()
+    elif game_state == "playing":
+        draw_game_screen()
+    elif game_state == "game_over":
+        draw_game_over_screen()
+
 def draw_menu():
     screen.draw.text("KodPy", center=(400, 70), fontsize=80, color="white")
     screen.draw.text("Platformer Game", center=(400, 110), fontsize=30, color="gray")
     start_button.draw()
     sound_button.draw()
     exit_button.draw()
+def draw_game_screen():
+    for platform in platforms:
+        platform.draw()
+    for enemy in enemies:
+        enemy.draw()
+    player.draw()
+    screen.draw.text(f"Health: {player.health}", (10, 10), color="white", fontsize=30)
+
+
 def reset_game_state():
     player.x, player.y = 100, 500
     player.health = 3
