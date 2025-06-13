@@ -123,6 +123,15 @@ class Bee(Enemy):
             self.movement_speed *= -1
         self.animate()
 
+player = Player()
+platforms = [Platform(0, 580, 800, 20), Platform(300, 450, 150, 20)]
+# enemies = [Enemy(500, 530)]
+enemies = [
+    Spider(500, 530),
+    Bee(650, 300)
+]
+
+
 player.health = 3
 player.invincible = False
 player.invincibility_timer = 0
