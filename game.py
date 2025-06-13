@@ -42,6 +42,8 @@ class Player(Actor):
         self.velocity_x = 0
         if keyboard.left:
             self.velocity_x = -3
+            if self.left < 10:
+                self.velocity_x = 0
         if keyboard.right:
             self.velocity_x = 3
         self.x += self.velocity_x
