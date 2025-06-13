@@ -152,3 +152,12 @@ def check_player_enemy_collisions():
                 music.stop()
             return
 
+start_button = Actor('menu/start_btn.png', (400, 200))
+sound_button = Actor('menu/sound_on_btn', (400, 350))
+exit_button = Actor('menu/exit_btn', (400, 500))
+def draw_menu():
+    screen.draw.text("KodPy", center=(400, 70), fontsize=80, color="white")
+    screen.draw.text("Platformer Game", center=(400, 110), fontsize=30, color="gray")
+    start_button.draw()
+    sound_button.draw()
+    exit_button.draw()
