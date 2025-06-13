@@ -81,3 +81,45 @@ class Platform:
 
     def draw(self):
         screen.draw.filled_rect(self.rectangle, (100, 100, 100))
+class Enemy(Actor):
+    def __init__(self, sprite_prefix, x, y):
+        super().__init__(f'{sprite_prefix}1', (x, y))
+        self.sprite_prefix = sprite_prefix
+        self.animation_frame = 0
+        self.animation_timer = 0
+
+    def animate(self):
+        self.animation_timer += 1
+        if self.animation_timer > 10:
+            self.animation_frame = (self.animation_frame + 1) % 2
+            self.animation_timer = 0
+        self.image = f'{self.sprite_prefix}{self.animation_frame + 1}'
+
+
+class Spider(Enemy):
+    def __init__(self, x, y):
+        super().__init__('enemy/spider/enemy_walk', x, y)
+        self.movement_speed = 2
+        self.left_limit = x - 100
+        self.right_limit = x + 100
+
+    def update(self):
+        self.x += self.movement_speed
+        if self.x < self.left_limit or self.x > self.right_limit:
+            self.movement_speed *= -1
+        self.animate()
+
+
+class Bee(Enemy):
+    def __init__(self, x, y):
+        super().__init__('enemy/bee/bee_fly', x, y)
+        self.movement_speed = 1.5
+        self.upper_limit = y - 80
+        self.lower_limit = y + 80
+
+    def update(self):
+        self.y += self.movement_speed
+        if self.y < self.upper_limit or self.y > self.lower_limit:
+            self.movement_speed *= -1
+        self.animate()
+
