@@ -10,6 +10,9 @@ sounds: any  # type: ignore
 
 WIDTH = 800
 HEIGHT = 600
+# Estados do jogo
+game_state = "menu"  # menu, playing, game_over
+
 is_music_enabled = True
 is_sound_enabled = True
 class Player(Actor):
