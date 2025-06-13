@@ -161,3 +161,21 @@ def draw_menu():
     start_button.draw()
     sound_button.draw()
     exit_button.draw()
+def reset_game_state():
+    player.x, player.y = 100, 500
+    player.health = 3
+    player.invincible = False
+    player.invincibility_timer = 0
+    player.is_hurt = False
+    player.hurt_timer = 0
+    for enemy in enemies:
+        if isinstance(enemy, Spider):
+            enemy.x = 500
+        elif isinstance(enemy, Bee):
+            enemy.y = 300
+    if is_music_enabled:
+        music.play('bg_music')
+        music.set_volume(0.3)
+def draw_game_over_screen():
+    screen.draw.text("GAME OVER", center=(400, 200), fontsize=80, color="red")
+    screen.draw.text("Clique para voltar ao menu", center=(400, 300), fontsize=40, color="white")
