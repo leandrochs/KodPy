@@ -75,3 +75,9 @@ class Player(Actor):
             self.image = f'player_idle/player_idle{self.animation_frame + 1}'
 
 
+class Platform:
+    def __init__(self, x, y, width, height):
+        self.rectangle = Rect((x, y), (width, height))
+
+    def draw(self):
+        screen.draw.filled_rect(self.rectangle, (100, 100, 100))
