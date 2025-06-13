@@ -263,12 +263,14 @@ def toggle_music_and_sound():
         music.stop()
         sound_button.image = 'menu/sound_off_btn'
 
-
-if is_music_enabled:
-    music.play('bg_music')
-    music.set_volume(0.3)
-
 def draw_game_over_screen():
     screen.draw.text("GAME OVER", center=(400, 200), fontsize=80, color="red")
     screen.draw.text("Clique para voltar ao menu", center=(400, 300), fontsize=40, color="white")
 
+def initialize_game():
+    global is_music_enabled
+    if is_music_enabled:
+        music.play('bg_music')
+        music.set_volume(0.3)
+
+initialize_game()
