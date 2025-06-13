@@ -246,9 +246,7 @@ def reset_game_state():
             enemy.x = 500
         elif isinstance(enemy, Bee):
             enemy.y = 300
-    if is_music_enabled:
-        music.play('bg_music')
-        music.set_volume(0.3)
+    initialize_game()
 
 
 def toggle_music_and_sound():
