@@ -72,7 +72,7 @@ class Player(Actor):
             if self.hurt_timer > 30:  # meio segundo
                 self.is_hurt = False
                 self.hurt_timer = 0
-            return  # não anima andando enquanto está machucado
+            return
 
         self.animation_timer += 1
         if self.animation_timer > 10:
@@ -139,7 +139,6 @@ class Bee(Enemy):
 # Instâncias
 player = Player()
 platforms = [Platform(0, 580, 800, 20), Platform(300, 450, 150, 20)]
-# enemies = [Enemy(500, 530)]
 enemies = [
     Spider(500, 530),
     Bee(650, 300)
@@ -257,13 +256,13 @@ def toggle_music_and_sound():
     global is_music_enabled, is_sound_enabled
     is_music_enabled = not is_music_enabled
     is_sound_enabled = is_music_enabled
-    if not is_music_enabled:
-        music.stop()
-        sound_button.image = 'menu/sound_off_btn'
-    else:
+    if is_music_enabled:
         music.play('bg_music')
         music.set_volume(0.3)
         sound_button.image = 'menu/sound_on_btn'
+    else:
+        music.stop()
+        sound_button.image = 'menu/sound_off_btn'
 
 
 if is_music_enabled:
