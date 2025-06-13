@@ -161,19 +161,17 @@ def check_player_enemy_collisions():
         return
 
     for enemy in enemies:
-        if player.colliderect(enemy):
+        if player.colliderect(enemy) and not player.invincible:
             player.health -= 1
             player.is_hurt = True
             player.invincible = True
-            player.invincibility_timer = 0
             if is_sound_enabled:
                 sounds.hit.play()
             print(f"Player hit! Health: {player.health}")
             if player.health <= 0:
-                print("Game Over")
                 game_state = "game_over"
                 music.stop()
-            return
+            break
 
 
 
