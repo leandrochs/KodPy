@@ -187,6 +187,22 @@ def draw_game_screen():
     screen.draw.text(f"Health: {player.health}", (10, 10), color="white", fontsize=30)
 
 
+def on_mouse_down(pos):
+    global game_state, is_music_enabled
+    if game_state == "menu":
+        if start_button.collidepoint(pos):
+            game_state = "playing"
+            if is_music_enabled:
+                music.play('bg_music')
+                music.set_volume(0.3)
+        elif sound_button.collidepoint(pos):
+            toggle_music_and_sound()
+        elif exit_button.collidepoint(pos):
+            quit()
+    elif game_state == "game_over":
+        game_state = "menu"
+        reset_game_state()
+
 def reset_game_state():
     player.x, player.y = 100, 500
     player.health = 3
