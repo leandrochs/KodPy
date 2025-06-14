@@ -151,12 +151,18 @@ class Bee(Enemy):
 
 # Instâncias
 player = Player()
-platforms = [Platform(0, 580, 10000, 20)]
+platforms = [Platform(0, 580, 1000, 20)]
 enemies = []
 
 # Função para gerar o mundo dinamicamente
 def generate_world():
     global last_platform_x, last_enemy_x
+    # Garantir que o piso base seja estendido
+    for platform in platforms:
+        if platform.rectangle.y == 580 and platform.rectangle.height == 20:  # Identifica o piso base
+            if platform.rectangle.right < world_offset + WIDTH:
+                platforms.append(Platform(platform.rectangle.right, 580, 1000, 20))
+    # Geração de plataformas flutuantes
     while last_platform_x < world_offset + WIDTH * 2:
         x = last_platform_x + randint(200, 400)
         y = randint(400, 500)
