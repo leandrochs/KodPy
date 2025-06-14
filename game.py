@@ -102,6 +102,12 @@ class Player(Actor):
 class Platform:
     def __init__(self, x, y, width, height):
         self.rectangle = Rect((x, y), (width, height))
+        # Define cor com pequena variação aleatória
+        self.color = (
+            randint(80, 120),
+            randint(80, 120),
+            randint(80, 120)
+        )
 
     def draw(self):
         screen.draw.filled_rect(self.rectangle, (100, 100, 100))
