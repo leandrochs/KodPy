@@ -195,12 +195,20 @@ exit_button = Actor('menu/exit_btn', (400, 500))
 
 # Funções principais
 def update():
-    global current_game_state
+    global current_game_state, world_offset, score
     if current_game_state == "playing":
         player.update()
+        if player.x > WIDTH * 0.7:
+            world_offset += player.x - WIDTH * 0.7
+            player.x = WIDTH * 0.7
         for enemy in enemies:
             enemy.update()
+            enemy_screen_x = enemy.x - world_offset
+            if not enemy.passed and player.x > enemy_screen_x + enemy.width:
+                score += 1
+                enemy.passed = True
         check_player_enemy_collisions()
+        generate_world()
 
 def draw():
     screen.clear()
