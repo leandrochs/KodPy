@@ -62,11 +62,22 @@ class Player(Actor):
         self.check_ground()
 
     def check_ground(self):
-        self.is_on_ground  = False
+        self.is_on_ground = False
         for platform in platforms:
+            original_x = platform.rectangle.x
+            platform.rectangle.x -= world_offset
             if self.colliderect(platform.rectangle) and self.velocity_y >= 0:
-                self.y = platform.rectangle.top - self.height / 2
-                self.is_on_ground  = True
+                if self.bottom >= platform.rectangle.top and self.bottom <= platform.rectangle.top + 10:
+                    self.y = platform.rectangle.top - self.height / 2
+                    self.velocity_y = 0
+                    self.is_on_ground = True
+            platform.rectangle.x = original_x
+
+        base_ground_y = 580 - self.height / 2
+        if self.y > base_ground_y:
+            self.y = base_ground_y
+            self.velocity_y = 0
+            self.is_on_ground = True
 
     def animate(self):
         if self.is_hurt:
