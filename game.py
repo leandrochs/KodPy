@@ -165,8 +165,12 @@ def generate_world():
         last_platform_x = x + width
     while last_enemy_x < world_offset + WIDTH * 1.5:
         x = last_enemy_x + randint(300, 500)
-        y = randint(200, 500)
+        # y = randint(200, 500)
         enemy_type = choice([Spider, Bee])
+        if enemy_type == Spider:
+            y = 580  # Altura do chão
+        else:
+            y = randint(200, 500)
         enemies.append(enemy_type(x, y))
         last_enemy_x = x
     platforms[:] = [p for p in platforms if p.rectangle.right > world_offset or p.rectangle.height == 20 and p.rectangle.y == 580]
