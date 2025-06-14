@@ -149,48 +149,28 @@ class Bee(Enemy):
             self.movement_speed *= -1
         self.animate()
 
-
 # Instâncias
 player = Player()
-platforms = [Platform(0, 580, 800, 20), Platform(300, 450, 150, 20)]
-enemies = [
-    Spider(500, 530),
-    Bee(650, 300)
-]
+platforms = [Platform(0, 580, 10000, 20)]
+enemies = []
 
-
-##################### dano ao player
-player.health = 3
-player.invincible = False
-player.invincibility_timer = 0
-
-
-def check_player_enemy_collisions():
-    global current_game_state
-    if player.invincible:
-        player.invincibility_timer += 1
-        if player.invincibility_timer > 60:
-            player.invincible = False
-            player.invincibility_timer = 0
-        return
-
-    for enemy in enemies:
-        if player.colliderect(enemy) and not player.invincible:
-            player.health -= 1
-            player.is_hurt = True
-            player.invincible = True
-            if is_sound_enabled:
-                sounds.hit.play()
-            print(f"Player hit! Health: {player.health}")
-            if player.health <= 0:
-                current_game_state = GAME_STATES["GAME_OVER"]
-                music.stop()
-            break
-
-
-
-###########################################
-
+# Função para gerar o mundo dinamicamente
+def generate_world():
+    global last_platform_x, last_enemy_x
+    while last_platform_x < world_offset + WIDTH * 2:
+        x = last_platform_x + randint(200, 400)
+        y = randint(400, 500)
+        width = randint(100, 200)
+        platforms.append(Platform(x, y, width, 20))
+        last_platform_x = x + width
+    while last_enemy_x < world_offset + WIDTH * 1.5:
+        x = last_enemy_x + randint(300, 500)
+        y = randint(200, 500)
+        enemy_type = choice([Spider, Bee])
+        enemies.append(enemy_type(x, y))
+        last_enemy_x = x
+    platforms[:] = [p for p in platforms if p.rectangle.right > world_offset or p.rectangle.height == 20 and p.rectangle.y == 580]
+    enemies[:] = [e for e in enemies if e.x + e.width > world_offset]
 
 # Menu buttons
 start_button = Actor('menu/start_btn.png', (400, 200))
