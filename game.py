@@ -10,8 +10,45 @@ music: any  # type: ignore
 sounds: any  # type: ignore
 
 # === Game Configuration ===
-WIDTH = 800
-HEIGHT = 600
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+FLOOR_Y_POSITION = 580
+FLOOR_HEIGHT = 20
+FLOOR_WIDTH = 10000
+PLAYER_INITIAL_X = 100
+PLAYER_INITIAL_Y = 500
+PLAYER_MOVEMENT_SPEED = 3
+GRAVITY_FORCE = 0
+PLAYER_JUMP_FORCE = -10
+PLAYER_MAX_HEALTH = 5
+WORLD_SCROLL_LIMIT = WINDOW_WIDTH * 0.7
+PLATFORM_MIN_X_SPACING = 200
+PLATFORM_MAX_X_SPACING = 400
+PLATFORM_MIN_Y_POSITION = 400
+PLATFORM_MAX_Y_POSITION = 500
+PLATFORM_MIN_WIDTH = 100
+PLATFORM_MAX_WIDTH = 200
+ENEMY_MIN_X_SPACING = 300
+ENEMY_MAX_X_SPACING = 500
+ENEMY_MIN_Y_POSITION = 200
+ENEMY_MAX_Y_POSITION = 500
+SPIDER_PATROL_RANGE = 100
+SPIDER_MOVEMENT_SPEED = 2
+BEE_PATROL_RANGE = 80
+BEE_MOVEMENT_SPEED = 1
+ANIMATION_FRAME_INTERVAL = 10
+HURT_ANIMATION_DURATION = 30
+INVINCIBILITY_DURATION = 60
+MENU_TITLE_Y_POSITION = 70
+MENU_SUBTITLE_Y_POSITION = 110
+MENU_BUTTON_START_Y = 200
+MENU_BUTTON_Y_OFFSET = 150
+SCREEN_LEFT_LIMIT = 10
+HEAD_TEXT_X = 10
+HEAD_TEXT_Y = 10
+GAME_OVER_MESSAGE_Y = 200
+SCORE_DISPLAY_Y = 250
+RESTART_PROMPT_Y = 300
 
 GAME_STATES = {
     "MENU": "menu",
@@ -31,7 +68,7 @@ score = 0
 # === Player Module ===
 class Player(Actor):
     def __init__(self):
-        super().__init__('player_idle/player_idle1', (100, 500))
+        super().__init__('player_idle/player_idle1', (PLAYER_INITIAL_X, PLAYER_INITIAL_Y))
         self.velocity_x = 0
         self.velocity_y = 0
         self.is_on_ground = False
@@ -39,7 +76,7 @@ class Player(Actor):
         self.animation_timer = 0
         self.is_hurt = False
         self.hurt_timer = 0
-        self.health = 5
+        self.health = PLAYER_MAX_HEALTH
         self.invincible = False
         self.invincibility_timer = 0
 
@@ -50,19 +87,19 @@ class Player(Actor):
     def move(self):
         self.velocity_x = 0
         if keyboard.left:
-            self.velocity_x = -3
-            if self.left < 10:
+            self.velocity_x = -PLAYER_MOVEMENT_SPEED
+            if self.left < SCREEN_LEFT_LIMIT:
                 self.velocity_x = 0
         if keyboard.right:
-            self.velocity_x = 3
+            self.velocity_x = PLAYER_MOVEMENT_SPEED
         self.x += self.velocity_x
 
         if not self.is_on_ground:
-            self.velocity_y += 0.5  # Gravity
+            self.velocity_y += GRAVITY_FORCE
         else:
             self.velocity_y = 0
             if keyboard.space:
-                self.velocity_y = -10
+                self.velocity_y = PLAYER_JUMP_FORCE
                 if is_sound_enabled:
                     sounds.jump.play()
                 self.is_on_ground = False
@@ -82,7 +119,7 @@ class Player(Actor):
                     self.is_on_ground = True
             platform.rectangle.x = original_x
 
-        base_ground_y = 580 - self.height / 2
+        base_ground_y = FLOOR_Y_POSITION - self.height / 2
         if self.y > base_ground_y:
             self.y = base_ground_y
             self.velocity_y = 0
@@ -92,13 +129,13 @@ class Player(Actor):
         if self.is_hurt:
             self.image = 'player_idle/player_hurt'
             self.hurt_timer += 1
-            if self.hurt_timer > 30:  # 0.5 seconds
+            if self.hurt_timer > HURT_ANIMATION_DURATION:
                 self.is_hurt = False
                 self.hurt_timer = 0
             return
 
         self.animation_timer += 1
-        if self.animation_timer > 10:
+        if self.animation_timer > ANIMATION_FRAME_INTERVAL:
             self.animation_frame = (self.animation_frame + 1) % 2
             self.animation_timer = 0
         if self.velocity_x != 0:
@@ -126,7 +163,7 @@ class Enemy(Actor):
 
     def animate(self):
         self.animation_timer += 1
-        if self.animation_timer > 10:
+        if self.animation_timer > ANIMATION_FRAME_INTERVAL:
             self.animation_frame = (self.animation_frame + 1) % 2
             self.animation_timer = 0
         self.image = f'{self.sprite_prefix}{self.animation_frame + 1}'
@@ -134,9 +171,9 @@ class Enemy(Actor):
 class Spider(Enemy):
     def __init__(self, x, y):
         super().__init__('enemy/spider/enemy_walk', x, y)
-        self.movement_speed = 2
-        self.left_limit = x - 100
-        self.right_limit = x + 100
+        self.movement_speed = SPIDER_MOVEMENT_SPEED
+        self.left_limit = x - SPIDER_PATROL_RANGE
+        self.right_limit = x + SPIDER_PATROL_RANGE
 
     def update(self):
         self.x += self.movement_speed
@@ -147,9 +184,9 @@ class Spider(Enemy):
 class Bee(Enemy):
     def __init__(self, x, y):
         super().__init__('enemy/bee/bee_fly', x, y)
-        self.movement_speed = 1.5
-        self.upper_limit = y - 80
-        self.lower_limit = y + 80
+        self.movement_speed = BEE_MOVEMENT_SPEED
+        self.upper_limit = y - BEE_PATROL_RANGE
+        self.lower_limit = y + BEE_PATROL_RANGE
 
     def update(self):
         self.y += self.movement_speed
@@ -159,39 +196,39 @@ class Bee(Enemy):
 
 # === Game Objects ===
 player = Player()
-platforms = [Platform(0, 580, 10000, 20)]
+platforms = [Platform(0, FLOOR_Y_POSITION, FLOOR_WIDTH, FLOOR_HEIGHT)]
 enemies = []
-start_button = Actor('menu/start_btn.png', (400, 200))
-sound_button = Actor('menu/sound_on_btn', (400, 350))
-exit_button = Actor('menu/exit_btn', (400, 500))
+start_button = Actor('menu/start_btn.png', (WINDOW_WIDTH // 2, MENU_BUTTON_START_Y))
+sound_button = Actor('menu/sound_on_btn', (WINDOW_WIDTH // 2, MENU_BUTTON_START_Y + MENU_BUTTON_Y_OFFSET))
+exit_button = Actor('menu/exit_btn', (WINDOW_WIDTH // 2, MENU_BUTTON_START_Y + 2 * MENU_BUTTON_Y_OFFSET))
 
 # === World Generation ===
 def generate_world():
     global last_platform_x, last_enemy_x
     # Extend base floor
     for platform in platforms:
-        if platform.rectangle.y == 580 and platform.rectangle.height == 20:
-            if platform.rectangle.right < world_offset + WIDTH:
-                platforms.append(Platform(platform.rectangle.right, 580, 10000, 20))
+        if platform.rectangle.y == FLOOR_Y_POSITION and platform.rectangle.height == FLOOR_HEIGHT:
+            if platform.rectangle.right < world_offset + WINDOW_WIDTH:
+                platforms.append(Platform(platform.rectangle.right, FLOOR_Y_POSITION, FLOOR_WIDTH, FLOOR_HEIGHT))
 
     # Generate floating platforms
-    while last_platform_x < world_offset + WIDTH * 2:
-        x = last_platform_x + randint(200, 400)
-        y = randint(400, 500)
-        width = randint(100, 200)
-        platforms.append(Platform(x, y, width, 20))
+    while last_platform_x < world_offset + WINDOW_WIDTH * 2:
+        x = last_platform_x + randint(PLATFORM_MIN_X_SPACING, PLATFORM_MAX_X_SPACING)
+        y = randint(PLATFORM_MIN_Y_POSITION, PLATFORM_MAX_Y_POSITION)
+        width = randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
+        platforms.append(Platform(x, y, width, FLOOR_HEIGHT))
         last_platform_x = x + width
 
     # Generate enemies
-    while last_enemy_x < world_offset + WIDTH * 1.5:
-        x = last_enemy_x + randint(300, 500)
+    while last_enemy_x < world_offset + WINDOW_WIDTH * 1.5:
+        x = last_enemy_x + randint(ENEMY_MIN_X_SPACING, ENEMY_MAX_X_SPACING)
         enemy_type = choice([Spider, Bee])
-        y = 580 if enemy_type == Spider else randint(200, 500)
+        y = FLOOR_Y_POSITION if enemy_type == Spider else randint(ENEMY_MIN_Y_POSITION, ENEMY_MAX_Y_POSITION)
         enemies.append(enemy_type(x, y))
         last_enemy_x = x
 
     # Clean up off-screen objects
-    platforms[:] = [p for p in platforms if p.rectangle.right > world_offset or (p.rectangle.height == 20 and p.rectangle.y == 580)]
+    platforms[:] = [p for p in platforms if p.rectangle.right > world_offset or (p.rectangle.height == FLOOR_HEIGHT and p.rectangle.y == FLOOR_Y_POSITION)]
     enemies[:] = [e for e in enemies if e.x + e.width > world_offset]
 
 # === Game Logic ===
@@ -199,9 +236,9 @@ def update():
     global current_game_state, world_offset, score
     if current_game_state == GAME_STATES["PLAYING"]:
         player.update()
-        if player.x > WIDTH * 0.7:
-            world_offset += player.x - WIDTH * 0.7
-            player.x = WIDTH * 0.7
+        if player.x > WORLD_SCROLL_LIMIT:
+            world_offset += player.x - WORLD_SCROLL_LIMIT
+            player.x = WORLD_SCROLL_LIMIT
         for enemy in enemies:
             enemy.update()
             enemy_screen_x = enemy.x - world_offset
@@ -215,7 +252,7 @@ def check_player_enemy_collisions():
     global current_game_state
     if player.invincible:
         player.invincibility_timer += 1
-        if player.invincibility_timer > 60:
+        if player.invincibility_timer > INVINCIBILITY_DURATION:
             player.invincible = False
             player.invincibility_timer = 0
         return
@@ -247,8 +284,8 @@ def draw():
         draw_game_over_screen()
 
 def draw_menu():
-    screen.draw.text("KodPy", center=(400, 70), fontsize=80, color="white")
-    screen.draw.text("Platformer Game", center=(400, 110), fontsize=30, color="gray")
+    screen.draw.text("KodPy", center=(WINDOW_WIDTH // 2, MENU_TITLE_Y_POSITION), fontsize=80, color="white")
+    screen.draw.text("Platformer Game", center=(WINDOW_WIDTH // 2, MENU_SUBTITLE_Y_POSITION), fontsize=30, color="gray")
     start_button.draw()
     sound_button.draw()
     exit_button.draw()
@@ -264,12 +301,12 @@ def draw_playing_state():
         enemy.draw()
         enemy.x += world_offset
     player.draw()
-    screen.draw.text(f"Health: {player.health} Score: {score}", (10, 10), color="white", fontsize=30)
+    screen.draw.text(f"Health: {player.health} Score: {score}", (HEAD_TEXT_X, HEAD_TEXT_Y), color="white", fontsize=30)
 
 def draw_game_over_screen():
-    screen.draw.text("GAME OVER", center=(400, 200), fontsize=80, color="red")
-    screen.draw.text(f"Score: {score}", center=(400, 250), fontsize=50, color="white")
-    screen.draw.text("Click to return to menu", center=(400, 300), fontsize=40, color="white")
+    screen.draw.text("GAME OVER", center=(WINDOW_WIDTH // 2, GAME_OVER_MESSAGE_Y), fontsize=80, color="red")
+    screen.draw.text(f"Score: {score}", center=(WINDOW_WIDTH // 2, SCORE_DISPLAY_Y), fontsize=50, color="white")
+    screen.draw.text("Click to return to menu", center=(WINDOW_WIDTH // 2, RESTART_PROMPT_Y), fontsize=40, color="white")
 
 # === Input Handling ===
 def on_mouse_down(pos):
@@ -291,8 +328,8 @@ def on_mouse_down(pos):
 # === Game State Management ===
 def reset_game_state():
     global world_offset, score, last_platform_x, last_enemy_x
-    player.x, player.y = 100, 500
-    player.health = 5
+    player.x, player.y = PLAYER_INITIAL_X, PLAYER_INITIAL_Y
+    player.health = PLAYER_MAX_HEALTH
     player.invincible = False
     player.invincibility_timer = 0
     player.is_hurt = False
@@ -303,7 +340,7 @@ def reset_game_state():
     last_enemy_x = 500
     platforms.clear()
     enemies.clear()
-    platforms.append(Platform(0, 580, 10000, 20))
+    platforms.append(Platform(0, FLOOR_Y_POSITION, FLOOR_WIDTH, FLOOR_HEIGHT))
     initialize_game()
 
 def toggle_music_and_sound():
