@@ -22,15 +22,20 @@ Bem-vindo ao **KodPy**, um jogo de plataforma 2D desenvolvido com Pygame Zero! N
 ## Instalação
 
 1. Clone o repositório:
+
    ```bash
    git clone <URL_DO_REPOSITORIO>
    cd kodpy
    ```
+
 2. Instale o Pygame Zero:
+
    ```bash
    pip install pgzero
    ```
+
 3. Execute o jogo:
+
    ```bash
    pgzrun game.py
    ```
