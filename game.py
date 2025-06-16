@@ -65,6 +65,57 @@ last_platform_x = 0
 last_enemy_x = 500
 score = 0
 
+# === Game Logic ===
+def update():
+    global current_game_state, world_offset, score
+    if current_game_state == GAME_STATES["PLAYING"]:
+        player.update()
+        if player.x > WORLD_SCROLL_LIMIT:
+            world_offset += player.x - WORLD_SCROLL_LIMIT
+            player.x = WORLD_SCROLL_LIMIT
+        for enemy in enemies:
+            enemy.update()
+            enemy_screen_x = enemy.x - world_offset
+            if not enemy.passed and player.x > enemy_screen_x + enemy.width:
+                score += 1
+                enemy.passed = True
+        check_player_enemy_collisions()
+        generate_world()
+
+# === Rendering ===
+def draw():
+    screen.clear()
+    if current_game_state == GAME_STATES["MENU"]:
+        draw_menu()
+    elif current_game_state == GAME_STATES["PLAYING"]:
+        draw_playing_state()
+    elif current_game_state == GAME_STATES["GAME_OVER"]:
+        draw_game_over_screen()
+
+# === Input Handling ===
+def on_mouse_down(pos):
+    global current_game_state, is_music_enabled
+    if current_game_state == GAME_STATES["MENU"]:
+        if start_button.collidepoint(pos):
+            current_game_state = GAME_STATES["PLAYING"]
+            if is_music_enabled:
+                music.play('bg_music')
+                music.set_volume(0.3)
+        elif sound_button.collidepoint(pos):
+            toggle_music_and_sound()
+        elif exit_button.collidepoint(pos):
+            quit()
+    elif current_game_state == GAME_STATES["GAME_OVER"]:
+        current_game_state = GAME_STATES["MENU"]
+        reset_game_state()
+
+# === Game Initialization ===
+def start_background_music():
+    global is_music_enabled
+    if is_music_enabled:
+        music.play('bg_music')
+        music.set_volume(0.3)
+
 # === Player Module ===
 class Player(Actor):
     def __init__(self):
@@ -205,13 +256,13 @@ exit_button = Actor('menu/exit_btn', (WINDOW_WIDTH // 2, MENU_BUTTON_START_Y + 2
 # === World Generation ===
 def generate_world():
     global last_platform_x, last_enemy_x
-    # Extend base floor
+    # floor
     for platform in platforms:
         if platform.rectangle.y == FLOOR_Y_POSITION and platform.rectangle.height == FLOOR_HEIGHT:
             if platform.rectangle.right < world_offset + WINDOW_WIDTH:
                 platforms.append(Platform(platform.rectangle.right, FLOOR_Y_POSITION, FLOOR_WIDTH, FLOOR_HEIGHT))
 
-    # Generate floating platforms
+    # floating platforms
     while last_platform_x < world_offset + WINDOW_WIDTH * 2:
         x = last_platform_x + randint(PLATFORM_MIN_X_SPACING, PLATFORM_MAX_X_SPACING)
         y = randint(PLATFORM_MIN_Y_POSITION, PLATFORM_MAX_Y_POSITION)
@@ -219,7 +270,7 @@ def generate_world():
         platforms.append(Platform(x, y, width, FLOOR_HEIGHT))
         last_platform_x = x + width
 
-    # Generate enemies
+    # enemies
     while last_enemy_x < world_offset + WINDOW_WIDTH * 1.5:
         x = last_enemy_x + randint(ENEMY_MIN_X_SPACING, ENEMY_MAX_X_SPACING)
         enemy_type = choice([Spider, Bee])
@@ -227,26 +278,9 @@ def generate_world():
         enemies.append(enemy_type(x, y))
         last_enemy_x = x
 
-    # Clean up off-screen objects
+    # Clean
     platforms[:] = [p for p in platforms if p.rectangle.right > world_offset or (p.rectangle.height == FLOOR_HEIGHT and p.rectangle.y == FLOOR_Y_POSITION)]
     enemies[:] = [e for e in enemies if e.x + e.width > world_offset]
-
-# === Game Logic ===
-def update():
-    global current_game_state, world_offset, score
-    if current_game_state == GAME_STATES["PLAYING"]:
-        player.update()
-        if player.x > WORLD_SCROLL_LIMIT:
-            world_offset += player.x - WORLD_SCROLL_LIMIT
-            player.x = WORLD_SCROLL_LIMIT
-        for enemy in enemies:
-            enemy.update()
-            enemy_screen_x = enemy.x - world_offset
-            if not enemy.passed and player.x > enemy_screen_x + enemy.width:
-                score += 1
-                enemy.passed = True
-        check_player_enemy_collisions()
-        generate_world()
 
 def check_player_enemy_collisions():
     global current_game_state
@@ -273,16 +307,6 @@ def check_player_enemy_collisions():
             break
         enemy.x = original_x
 
-# === Rendering ===
-def draw():
-    screen.clear()
-    if current_game_state == GAME_STATES["MENU"]:
-        draw_menu()
-    elif current_game_state == GAME_STATES["PLAYING"]:
-        draw_playing_state()
-    elif current_game_state == GAME_STATES["GAME_OVER"]:
-        draw_game_over_screen()
-
 def draw_menu():
     screen.draw.text("KodPy", center=(WINDOW_WIDTH // 2, MENU_TITLE_Y_POSITION), fontsize=80, color="white")
     screen.draw.text("Platformer Game", center=(WINDOW_WIDTH // 2, MENU_SUBTITLE_Y_POSITION), fontsize=30, color="gray")
@@ -308,23 +332,6 @@ def draw_game_over_screen():
     screen.draw.text(f"Score: {score}", center=(WINDOW_WIDTH // 2, SCORE_DISPLAY_Y), fontsize=50, color="white")
     screen.draw.text("Click to return to menu", center=(WINDOW_WIDTH // 2, RESTART_PROMPT_Y), fontsize=40, color="white")
 
-# === Input Handling ===
-def on_mouse_down(pos):
-    global current_game_state, is_music_enabled
-    if current_game_state == GAME_STATES["MENU"]:
-        if start_button.collidepoint(pos):
-            current_game_state = GAME_STATES["PLAYING"]
-            if is_music_enabled:
-                music.play('bg_music')
-                music.set_volume(0.3)
-        elif sound_button.collidepoint(pos):
-            toggle_music_and_sound()
-        elif exit_button.collidepoint(pos):
-            quit()
-    elif current_game_state == GAME_STATES["GAME_OVER"]:
-        current_game_state = GAME_STATES["MENU"]
-        reset_game_state()
-
 # === Game State Management ===
 def reset_game_state():
     global world_offset, score, last_platform_x, last_enemy_x
@@ -341,7 +348,7 @@ def reset_game_state():
     platforms.clear()
     enemies.clear()
     platforms.append(Platform(0, FLOOR_Y_POSITION, FLOOR_WIDTH, FLOOR_HEIGHT))
-    initialize_game()
+    start_background_music()
 
 def toggle_music_and_sound():
     global is_music_enabled, is_sound_enabled
@@ -355,11 +362,5 @@ def toggle_music_and_sound():
         music.stop()
         sound_button.image = 'menu/sound_off_btn'
 
-def initialize_game():
-    global is_music_enabled
-    if is_music_enabled:
-        music.play('bg_music')
-        music.set_volume(0.3)
-
 # === Game Initialization ===
-initialize_game()
+start_background_music()
